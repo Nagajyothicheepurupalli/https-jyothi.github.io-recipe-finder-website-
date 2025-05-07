@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search Recipes by Name</title>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 40px 20px;
+      background: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+    }
+
+    .search-container {
+      max-width: 600px;
+      margin: 30px auto;
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      background-color: #e67e22;
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #d35400;
+    }
+
+    .results {
+      margin-top: 30px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .recipe {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+    }
+
+    .recipe h3 {
+      margin-top: 0;
+    }
+
+    .recipe img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background-color: #e67e22;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .back-btn:hover {
+      background-color: #d35400;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="home.html" class="back-btn">← Back to Home</a>
+  <h1>🔍 Search Recipes by Name</h1>
+
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="e.g. chicken biryani, pasta, dosa" />
+    <button onclick="searchRecipes()">Search</button>
+  </div>
+
+  <div class="results" id="searchResults">
+    <!-- Search results go here -->
+  </div>
+
+  <script>
+    const apiKey = "7481376db7c549f38cd8d9cafff2c4c6"; // ✅ Your API Key
+
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "signup2.html";
+    }
+
+    async function searchRecipes() {
+      const query = document.getElementById("searchInput").value.trim();
+      const resultsDiv = document.getElementById("searchResults");
+      resultsDiv.innerHTML = "";
+
+      if (!query) {
+        resultsDiv.innerHTML = "<p>Please enter a dish name to search.</p>";
+        return;
+      }
+
+      const searchUrl = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(query)}&number=5&addRecipeInformation=true&apiKey=${apiKey}`;
+
+      try {
+        const res = await fetch(searchUrl);
+        const data = await res.json();
+
+        if (data.results.length === 0) {
+          resultsDiv.innerHTML = "<p>No recipes found. Try a different name.</p>";
+          return;
+        }
+
+        data.results.forEach(recipe => {
+          const div = document.createElement("div");
+          div.classList.add("recipe");
+
+          div.innerHTML = `
+            <h3>${recipe.title}</h3>
+            <img src="${recipe.image}" alt="${recipe.title}" />
+            <p><strong>Ready in:</strong> ${recipe.readyInMinutes} minutes</p>
+            <p><strong>Servings:</strong> ${recipe.servings}</p>
+            <p><a href="${recipe.sourceUrl}" target="_blank" style="color:#ffcc70;">🔗 Full Recipe Instructions</a></p>
+          `;
+
+          resultsDiv.appendChild(div);
+        });
+
+      } catch (err) {
+        console.error("Error:", err);
+        resultsDiv.innerHTML = "<p>There was an error fetching recipes.</p>";
+      }
+    }
+  </script>
+
+</body>
+</html>

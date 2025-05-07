@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recipe Finder - Home</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #fff;
+    }
+
+    .header {
+      margin-top: 60px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: bold;
+    }
+
+    .description {
+      font-size: 1.2rem;
+      margin-top: 10px;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-top: 60px;
+      width: 90%;
+      max-width: 800px;
+    }
+
+    .btn {
+      padding: 20px;
+      background-color: rgba(230, 126, 34, 0.9);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background-color: rgba(211, 84, 0, 0.95);
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.95rem;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .footer button {
+      width: auto;
+      padding: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 2rem;
+      }
+
+      .footer {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .footer button {
+        width: 90%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🍳 Welcome, <span id="userName">Guest</span>!</h1>
+    <p class="description">Choose an option below to explore, create, and save your favorite recipes based on what you have at home!</p>
+  </div>
+
+  <!-- Buttons -->
+  <div class="button-grid">
+    <button class="btn" onclick="goTo('ingredients')">🧂 Ingredients</button>
+    <button class="btn" onclick="goTo('recipes')">📖 Recipes</button>
+    <button class="btn" onclick="goTo('favourites')">❤️ Favourite Dishes</button>
+    <button class="btn" onclick="goTo('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="btn" onclick="goBackToHome()">🏠 Back to Home</button>
+    <button class="btn" onclick="goToAboutUs()">📜 About Us</button>
+    <button class="btn" onclick="goToFeedback()">💬 Give Feedback</button>
+    <button class="btn logout" onclick="logout()">🚪 Log Out</button>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Display user name
+    const user = localStorage.getItem('userName');
+    if (user) {
+      document.getElementById('userName').textContent = user;
+    }
+
+    // Redirect user if not logged in
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+      window.location.href = 'signup.html';
+    }
+
+    // Page navigation
+    function goTo(page) {
+      switch (page) {
+        case 'ingredients':
+          window.location.href = 'ingredients.html';
+          break;
+        case 'recipes':
+          window.location.href = 'recipes.html';
+          break;
+        case 'favourites':
+          window.location.href = 'Favourite Dishes.html';
+          break;
+        case 'settings':
+          window.location.href = 'settings.html';
+          break;
+        default:
+          alert('Page not found.');
+      }
+    }
+
+    function goBackToHome() {
+      window.location.href = 'home.html';
+    }
+
+    function goToAboutUs() {
+      window.location.href = 'about us.html';
+    }
+
+    function goToFeedback() {
+      window.location.href = 'feedback.html';
+    }
+
+    // Redirect to logout page
+    function logout() {
+      window.location.href = 'logout.html';
+    }
+  </script>
+
+</body>
+</html>

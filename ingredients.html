@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find Recipes by Ingredients</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5rem;
+      text-align: center;
+      color: #fff;
+    }
+
+    .input-section {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: bold;
+      background-color: #e67e22;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #d35400;
+    }
+
+    .ingredients-list {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(5px);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .ingredients-list ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .ingredients-list li {
+      background-color: rgba(255,255,255,0.15);
+      margin-bottom: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    .ingredients-list img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+      background-color: #fff;
+    }
+
+    /* Updated Results Section */
+    .results {
+      margin-top: 30px;
+      width: 100%;
+      max-width: 800px;
+      background-color: #f0f0f0; /* light gray */
+      padding: 20px;
+      border-radius: 10px;
+      color: black;
+    }
+
+    .recipe {
+      background-color: #ffffff; /* white background */
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 8px;
+      color: black;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .recipe h3 {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: black;
+    }
+
+    .recipe ol {
+      color: black;
+    }
+
+    .favorite-btn {
+      background-color: transparent;
+      border: none;
+      color: #e74c3c;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .favorite-btn.active {
+      color: #c0392b;
+    }
+
+    .back-to-home {
+      position: absolute;
+      left: 20px;
+      top: 20px;
+      padding: 12px;
+      background-color: rgba(46, 204, 113, 0.9);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      text-align: center;
+    }
+
+    .back-to-home:hover {
+      background-color: rgba(39, 174, 96, 0.95);
+    }
+
+    @media(max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <button class="back-to-home" onclick="goBackToHome()">🏠 Back to Home</button>
+
+  <h1>🍽️ Recipe Finder by Ingredients</h1>
+
+  <div class="input-section">
+    <input type="text" id="ingredientInput" placeholder="Enter one ingredient (e.g. tomato)">
+    <div>
+      <button onclick="addIngredient()">Add Ingredient</button>
+      <button onclick="findRecipes()">Find Recipes</button>
+    </div>
+  </div>
+
+  <div class="ingredients-list" id="ingredientList">
+    <h3>Your Ingredients:</h3>
+    <ul id="ingredientsUl"></ul>
+  </div>
+
+  <div class="results" id="recipeResults">
+    <!-- Recipe results will be inserted here -->
+  </div>
+
+  <script>
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      window.location.href = "signup.html";
+    }
+
+    let addedIngredients = [];
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    function goBackToHome() {
+      window.location.href = 'home.html';
+    }
+
+    function getIngredientImage(name) {
+      const base = 'https://source.unsplash.com/40x40/?';
+      return `${base}${encodeURIComponent(name)}`;
+    }
+
+    function addIngredient() {
+      const input = document.getElementById("ingredientInput");
+      const ingredient = input.value.trim().toLowerCase();
+      if (ingredient && !addedIngredients.includes(ingredient)) {
+        addedIngredients.push(ingredient);
+        updateIngredientList();
+        input.value = "";
+      }
+    }
+
+    function updateIngredientList() {
+      const ul = document.getElementById("ingredientsUl");
+      ul.innerHTML = "";
+      addedIngredients.forEach((item, index) => {
+        const li = document.createElement("li");
+        const img = document.createElement("img");
+        img.src = getIngredientImage(item);
+        img.alt = item;
+
+        const removeBtn = document.createElement("button");
+        removeBtn.textContent = "❌";
+        removeBtn.style.marginLeft = "auto";
+        removeBtn.style.background = "transparent";
+        removeBtn.style.border = "none";
+        removeBtn.style.color = "white";
+        removeBtn.style.cursor = "pointer";
+        removeBtn.onclick = () => {
+          addedIngredients.splice(index, 1);
+          updateIngredientList();
+        };
+
+        li.appendChild(img);
+        li.appendChild(document.createTextNode(item));
+        li.appendChild(removeBtn);
+        ul.appendChild(li);
+      });
+    }
+
+    const apiKey = '7481376db7c549f38cd8d9cafff2c4c6';
+
+    async function findRecipes() {
+      const query = addedIngredients.join(',');
+      const url = `https://api.spoonacular.com/recipes/findByIngredients?ingredients=${query}&number=5&apiKey=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        displayRecipes(data);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    }
+
+    async function displayRecipes(recipes) {
+      const container = document.getElementById("recipeResults");
+      container.innerHTML = "";
+
+      if (recipes.length === 0) {
+        container.innerHTML = "<p>No recipes found with the added ingredients. Try different ones!</p>";
+        return;
+      }
+
+      for (const recipe of recipes) {
+        const recipeDiv = document.createElement("div");
+        recipeDiv.classList.add("recipe");
+
+        const isFavorite = favorites.includes(recipe.id);
+        const favoriteBtn = document.createElement("button");
+        favoriteBtn.classList.add("favorite-btn");
+        favoriteBtn.innerHTML = isFavorite ? "❤️" : "🤍";
+        favoriteBtn.classList.toggle("active", isFavorite);
+
+        favoriteBtn.onclick = () => {
+          if (isFavorite) {
+            favorites = favorites.filter(id => id !== recipe.id);
+            favoriteBtn.innerHTML = "🤍";
+            favoriteBtn.classList.remove("active");
+          } else {
+            favorites.push(recipe.id);
+            favoriteBtn.innerHTML = "❤️";
+            favoriteBtn.classList.add("active");
+          }
+          localStorage.setItem("favorites", JSON.stringify(favorites));
+        };
+
+        const instructionsURL = `https://api.spoonacular.com/recipes/${recipe.id}/analyzedInstructions?apiKey=${apiKey}`;
+        let stepsHtml = "<em style='color: black;'>No instructions available.</em>";
+
+        try {
+          const res = await fetch(instructionsURL);
+          const instructionsData = await res.json();
+          if (instructionsData.length > 0) {
+            const steps = instructionsData[0].steps;
+            stepsHtml = "<div style='color: black;'><ol>";
+            steps.forEach(step => {
+              stepsHtml += `<li>${step.step}</li>`;
+            });
+            stepsHtml += "</ol></div>";
+          }
+        } catch (e) {
+          console.error("Error fetching instructions:", e);
+        }
+
+        recipeDiv.innerHTML = `
+          <div>
+            <h3>${recipe.title}</h3>
+            <p><strong>Used Ingredients:</strong> ${recipe.usedIngredients.map(i => i.name).join(", ")}</p>
+            <p><strong>Missed Ingredients:</strong> ${recipe.missedIngredients.map(i => i.name).join(", ")}</p>
+            <div><strong>Instructions:</strong> ${stepsHtml}</div>
+          </div>
+        `;
+        recipeDiv.appendChild(favoriteBtn);
+        container.appendChild(recipeDiv);
+      }
+    }
+  </script>
+</body>
+</html>
